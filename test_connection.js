@@ -4,7 +4,7 @@
  */
 require('dotenv').config();
 
-const DEFAULT_API_KEY = "AIzaSyCEIeNfyQFj_wG0tiXf7wNXx-wX5sDs1qo";
+const DEFAULT_API_KEY = "YOUR_API_KEY_HERE";
 const apiKey = process.env.GEMINI_API_KEY || DEFAULT_API_KEY;
 
 async function testConnection() {
