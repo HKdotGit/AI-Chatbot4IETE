@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IETE-SF AI | Powered by Gemini</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #070913;
+            --container-bg: #0d111d;
+            --border-color: #23293a;
+            --text-main: #f8fafc;
+            --text-muted: #8492a6;
+            --primary: #818cf8;
+            --primary-gradient: linear-gradient(135deg, #8b5cf6, #d946ef);
+            --hello-gradient: linear-gradient(90deg, #818cf8, #c084fc, #e879f9);
+            --pill-bg: rgba(255, 255, 255, 0.03);
+            --pill-border: rgba(255, 255, 255, 0.08);
+            --pill-hover: rgba(99, 102, 241, 0.08);
+            --btn-bg: #1a2035;
+            --btn-hover: #262e4a;
+            --input-bg: rgba(20, 26, 43, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            /* Faint Grid Background */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1100px;
+            height: 94vh;
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), 0 0 100px rgba(99, 102, 241, 0.05);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glow Behind Container */
+        .app-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 0%, rgba(99,102,241,0.06), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content-layer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Header Section */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(13, 17, 29, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+        }
+
+        .logo-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: var(--btn-hover);
+            color: var(--text-main);
+        }
+
+        /* Status Line */
+        .status-line {
+            padding: 12px 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        /* Main Chat Area */
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        .chat-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-area::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        /* Hero / Empty State */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px 20px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-title {
+            font-size: 60px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .hero-subtitle {
+            font-size: 60px;
+            font-weight: 800;
+            background: var(--hello-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 17px;
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        /* Stats Pills */
+        .stats-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 50px;
+        }
+
+        .stat-pill {
+            padding: 10px 20px;
+            background: var(--pill-bg);
+            border: 1px solid var(--pill-border);
+            border-radius: 100px;
+            font-size: 14px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-pill i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .stat-pill strong {
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Quick Questions */
+        .quick-questions-section {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .questions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .question-card {
+            background: rgba(20, 26, 43, 0.5);
+            border: 1px solid var(--pill-border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .question-card:hover {
+            background: var(--pill-hover);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .question-card i {
+            color: var(--primary);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .question-card span {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        /* Input Section */
+        .input-section {
+            padding: 24px 32px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            background: rgba(13, 17, 29, 0.95);
+        }
+
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .input-container:focus-within {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3);
+            background: rgba(20, 26, 43, 0.8);
+        }
+
+        #user-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            padding: 16px 20px;
+            font-size: 16px;
+            outline: none;
+            resize: none;
+            max-height: 150px;
+            min-height: 24px;
+            line-height: 1.5;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #user-input::placeholder {
+            color: #64748b;
+        }
+
+        .send-btn {
+            background: #262e4a;
+            color: #f8fafc;
+            border: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            margin-right: 6px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: transparent;
+            color: #475569;
+        }
+
+        .input-hint {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #475569;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .kbd-key {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Messages */
+        .chat-messages {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            display: none; /* Hidden initially */
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            max-width: 85%;
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+            max-width: 75%;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .bot .avatar {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .user .avatar {
+            background: #334155;
+            color: white;
+        }
+
+        .msg-content {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #f1f5f9;
+            padding-top: 5px;
+            border-radius: 16px;
+            word-wrap: break-word;
+        }
+
+        .user .msg-content {
+            background: #23293a;
+            padding: 14px 20px;
+            border-top-right-radius: 4px;
+        }
+
+        .bot .msg-content {
+            padding-right: 20px;
+        }
+
+        /* Markdown Styling inside Messages */
+        .msg-content p { margin-bottom: 12px; }
+        .msg-content p:last-child { margin-bottom: 0; }
+        .msg-content strong { color: #fff; font-weight: 600; }
+        .msg-content h1, .msg-content h2, .msg-content h3 {
+            margin: 20px 0 10px 0;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+        }
+        .msg-content pre {
+            background: #090b11;
+            padding: 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+        }
+        .msg-content code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(255,255,255,0.08);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            color: #bae6fd;
+        }
+        .msg-content pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+        }
+        .msg-content ul, .msg-content ol {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+        .msg-content li {
+            margin-bottom: 6px;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            padding: 12px 0;
+        }
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="content-layer">
+            
+            <!-- Header -->
+            <header class="header">
+                <div class="logo-area">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>IETE-SF AI</h1>
+                        <p>MPSTME · Powered by Gemini</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" id="refresh-btn" title="Refresh Chat"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button class="header-btn" title="Information"><i class="fa-solid fa-circle-info"></i></button>
+                    <button class="header-btn" title="Settings"><i class="fa-solid fa-sliders"></i></button>
+                </div>
+            </header>
+
+            <!-- Status -->
+            <div class="status-line">
+                <div class="status-dot"></div>
+                <span>AI Online · Gemini 2.0 Flash</span>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="chat-area" id="chat-area">
+                
+                <!-- Hero Section (Shown initially) -->
+                <div class="hero-section" id="hero-section">
+                    <h1 class="hero-title">Hello, Engineer! 👋</h1>
+                    <h2 class="hero-subtitle">How can I help you?</h2>
+                    <p class="hero-desc">I'm the official IETE-SF AI — ask me about our events, community, or any tech question you have.</p>
+
+                    <div class="stats-container">
+                        <div class="stat-pill"><i class="fa-solid fa-users"></i> <strong>220+</strong> Team Members</div>
+                        <div class="stat-pill"><i class="fa-solid fa-graduation-cap"></i> <strong>1,200+</strong> Alumni</div>
+                        <div class="stat-pill"><i class="fa-solid fa-trophy"></i> <strong>100K+</strong> Incentives</div>
+                    </div>
+
+                    <div class="quick-questions-section">
+                        <div class="section-label">Quick Questions</div>
+                        <div class="questions-grid">
+                            <div class="question-card" onclick="triggerQuickQuestion('Who is the President of IETE-SF?')">
+                                <i class="fa-solid fa-crown"></i>
+                                <span>Who is the President of IETE-SF?</span>
+                            </div>
+                            <div class="question-card" onclick="triggerQuickQuestion('What events does IETE-SF organize?')">
+                                <i class="fa-regular fa-calendar-days"></i>
+                                <span>What events does IETE-SF organize?</span>
+                            </div>
+                            <div class="question-card" onclick="triggerQuickQuestion('Show me all departments and their heads')">
+                                <i class="fa-solid fa-sitemap"></i>
+                                <span>Show me all departments and their heads</span>
+                            </div>
+                            <div class="question-card" onclick="triggerQuickQuestion('Tell me about the Supercore team')">
+                                <i class="fa-solid fa-people-group"></i>
+                                <span>Tell me about the Supercore team</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Container -->
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will be injected here -->
+                </div>
+
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-section">
+                <div class="input-container">
+                    <textarea id="user-input" placeholder="Ask me anything about IETE-SF or general tech..." rows="1"></textarea>
+                    <button class="send-btn" id="send-btn" disabled>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="input-hint">
+                    Press <span class="kbd-key">Enter</span> to send &middot; <span class="kbd-key">Shift+Enter</span> for new line
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Use the user's provided API Key natively
+        const API_KEY = "AIzaSyCEIeNfyQFj_wG0tiXf7wNXx-wX5sDs1qo"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${API_KEY}`;
+        
+        const chatArea = document.getElementById('chat-area');
+        const heroSection = document.getElementById('hero-section');
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+
+        let chatHistory = [];
+        let hasStartedChat = false;
+
+        // Marked.js config for markdown rendering
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
+        // Event Listeners
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            sendBtn.disabled = this.value.trim() === '';
+        });
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendBtn.disabled) {
+                    handleSendMessage();
+                }
+            }
+        });
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        
+        refreshBtn.addEventListener('click', () => {
+            chatMessages.innerHTML = '';
+            chatHistory = [];
+            hasStartedChat = false;
+            chatMessages.style.display = 'none';
+            heroSection.style.display = 'flex';
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            sendBtn.disabled = true;
+        });
+
+        function triggerQuickQuestion(question) {
+            userInput.value = question;
+            sendBtn.disabled = false;
+            handleSendMessage();
+        }
+
+        function createMessageElement(text, sender, isHtml = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'avatar';
+            avatarDiv.innerHTML = sender === 'bot' ? '<i class="fa-solid fa-microchip"></i>' : '<i class="fa-solid fa-user"></i>';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'msg-content';
+            
+            if (isHtml) {
+                contentDiv.innerHTML = text;
+            } else {
+                if (sender === 'bot' && text === 'typing') {
+                    contentDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+                    contentDiv.id = 'typing-indicator';
+                } else {
+                    contentDiv.textContent = text;
+                }
+            }
+
+            // Determine rendering order based on sender
+            if (sender === 'user') {
+                msgDiv.appendChild(contentDiv);
+                msgDiv.appendChild(avatarDiv);
+            } else {
+                msgDiv.appendChild(avatarDiv);
+                msgDiv.appendChild(contentDiv);
+            }
+            
+            return msgDiv;
+        }
+
+        async function handleSendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Hide hero section on first message
+            if (!hasStartedChat) {
+                heroSection.style.display = 'none';
+                chatMessages.style.display = 'flex';
+                hasStartedChat = true;
+            }
+
+            // Append User Message
+            const userMsg = createMessageElement(text, 'user');
+            chatMessages.appendChild(userMsg);
+            
+            // Reset input
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            sendBtn.disabled = true;
+
+            // Scroll to bottom
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            // Show Typing Indicator
+            const typingIndicator = createMessageElement('typing', 'bot');
+            chatMessages.appendChild(typingIndicator);
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            try {
+                chatHistory.push({ role: "user", parts: [{ text: text }] });
+
+                const systemInstruction = `You are the official IETE-SF AI Chatbot. Your primary role is to provide information about the tech community IETE-SF MPSTME based on the following official database.
+[IETE-SF DATABASE START]
+Motto: For the Engineers, By the Engineers.
+About: IETE-SF MPSTME is a thriving technical community where knowledge, collaboration, and innovation intersect.
+Stats: 220+ Team Members, 100K+ Incentives, 1,200+ Alumni, 2,500+ Followers.
+Mission Core Values:
+- ADAPT: Embracing adaptability is the key to thriving in this dynamic landscape.
+- EVOLVE: It's not just about keeping pace with change but about driving it forward.
+- RESONATE: Creating solutions that deeply connect with people, leaving a lasting impact.
+Events:
+- Addapt: Debate forum for devising practical solutions to real-life challenges.
+- ACE: Interactive conference tackling real-world tech challenges.
+- 411: Discover trailblazers who transformed their engineering degrees.
+- U'lectro: National talents showcase their best.
+
+Team Structure & Departments:
+Supercore:
+- President: Usaid Ali
+- Vice-President: Ronit Vengurlekar
+- Secretary: Jhalak Agarwal
+- Joint-Secretary Management: Vanshika Beriwal
+- Joint-Secretary Technicals: Anirudh Pathak
+- Treasurer: Chaitanya Talwar
+
+Departments & Heads:
+- Admin & Hospitality: Dhruvi Doshi, Neev Mhatre (Sub-Heads: Dhruv Parekh, Shivam Gogri, Maitreyi Garate, Vasu Lukhi, Ayush Gandhi)
+- Artist & Guest Management: Neil Shinde, Sahasra Ramadugu (Sub-Heads: Tanush Khetan, Vivaan, Kanishka Anand, Akshit Makwana)
+- Digital Creatives: Krish Viramgama, Shayan Mandrekar (Sub-Heads: Yuvam Shah, Rugved Tatkare, Pranshu Sinha, Shravan Kadam)
+- External Management: Akshay Sathaye, Veer Nagda (Sub-Heads: Krishiv Desai, Prisha Gala, Prisha Jain, Yohaan Wadia, Kavya Vasa)
+- In-House Creatives: Vansh Modani, Mahek Shah (Sub-Heads: Sarah Gonsalves, Sharanya Singh, Raghav Tiwar, Aaradhya)
+- Logistics: Arham Shaikh, Kshitij Shrivastav (Sub-Heads: Akshansh Chandra, Shlok Dharani, Siddham Shah, Mahek Kapahi)
+- Marketing: Jaitra Shah, Khushi Chowdhary (Sub-Heads: Shreya Sanghavi, Dhruv Mane, Hitarth Vasa, Pratham Ashar, Viva Thakkar)
+- Photography: Swara Shah, Aryan Pisal (Sub-Heads: Niyomi Gandhi, Hitanksh Gala, Parv Jain)
+- Publicity: Varun Singh, Muskaan Jaggi (Sub-Heads: Arnab Mukhopadhyay, Arushi Dube, Nyssa Nuhaa, Suraj Modani)
+- Research & Development: Sakshi Rohida, Parshva Samdadiya (Sub-Heads: Dirgh Chikani, Hrishikesh Kunde, Mahek Busa, Sohham Soundalkar)
+- Social Media & Content Writing: Diya Mehta, Hiya Shah (Sub-Heads: Riti Shah, Mahek Shah, Jeena Savla, Himanshu Thakkar)
+- Tech & Informals: Shrey Shah, Nain Sadarangani (Sub-Heads: Jagjyot Singh, Sehaj Singh Banga, Yash Bohra, Nihar Bondre, Tanvi Khanvilkar)
+
+General Info & Contact:
+- Website: https://ietempstme.com
+- Established: 2013
+- Email: mpstmeiete@gmail.com
+- Location: Mukesh Patel School of Technology Management & Engineering, Vileparle West, Mumbai.
+- Faculty Mentors: Prof. Ketki Deshmukh, Prof. Kanchan Bakhade, Prof. Sumita Nainan
+[IETE-SF DATABASE END]
+
+Rules:
+1. When asked about IETE-SF, answer gracefully and enthusiastically using the database above. If asked who you are, introduce yourself.
+2. Provide concise, friendly answers and format them beautifully using markdown.
+3. You are a highly versatile AI. If asked about general tech, coding, or any topics unrelated to IETE-SF, seamlessly answer them utilizing your broader Gemini knowledge base. Do not force the conversation back to IETE-SF or sound overly self-centered about the organization.`;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: chatHistory,
+                        systemInstruction: {
+                            parts: [{ text: systemInstruction }]
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                let botReply = '';
+                
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    botReply = data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error("Invalid response structure from Gemini API");
+                }
+                
+                chatHistory.push({ role: "model", parts: [{ text: botReply }] });
+
+                // Check for unanswered queries (simple catch-and-log simulation)
+                if (botReply.toLowerCase().includes("i don't have information") || 
+                    botReply.toLowerCase().includes("i'm not sure about that specific detail regarding iete-sf")) {
+                    console.log("Logged unanswered query:", text);
+                    botReply += "\n\n*(Note: I've logged this question for our team to update my knowledge base!)*";
+                }
+
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.closest('.message').remove();
+
+                // Append Bot Message
+                const htmlContent = marked.parse(botReply);
+                const botMsg = createMessageElement(htmlContent, 'bot', true);
+                chatMessages.appendChild(botMsg);
+                
+                chatArea.scrollTop = chatArea.scrollHeight;
+
+            } catch (error) {
+                console.error("Error:", error);
+                
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.closest('.message').remove();
+                
+                chatHistory.pop(); // Remove faulty message
+
+                let userFriendlyError = error.message;
+                if (error.message.includes('429')) {
+                    userFriendlyError = "I'm currently receiving too many requests. Please wait a few seconds and try again!";
+                }
+
+                const errorMsg = `<p style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Oops! I encountered an error connecting to my servers.</p><p style="font-size:13px;color:#cbd5e1;margin-top:10px;">${userFriendlyError}</p>`;
+                const botMsg = createMessageElement(errorMsg, 'bot', true);
+                chatMessages.appendChild(botMsg);
+                
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
